@@ -78,13 +78,13 @@ export async function updateAssignments(campaignInfo) {
         let texterId = texters[i].user_id
         let assignmentId = texters[i].id
         let texterAssignmentKey = `newassignments-${texterId}-${campaignId}`
-        let texterAssignment = `textercontactslist`
         const assignments = await r.knex('campaign_contact')
           .where('assignment_id', assignmentId)
 
-        console.log('assignments for this texter:', JSON.stringify(assignments));
-        // value is the acutal assignment for a specific texter
-        await r.redis.lpush(texterAssignmentKey, texterAssignment)
+        await r.redis.multi()
+          .lpush(texterAssignmentKey, JSON.stringify(assignments))
+          .expire(texterAssignmentKey, 86400)
+          .exec()
       }
     }
   }
