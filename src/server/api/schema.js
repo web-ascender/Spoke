@@ -776,6 +776,7 @@ const rootMutations = {
       return campaign
     },
     startCampaign: async (_, { id }, { user, loaders }) => {
+      console.log('campaign has started');
       const campaign = await loaders.campaign.load(id)
       await accessRequired(user, campaign.organization_id, 'ADMIN')
       campaign.is_started = true
