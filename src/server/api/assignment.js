@@ -1,6 +1,7 @@
 import { mapFieldsToModel } from './lib/utils'
 import { Assignment, r } from '../models'
 import { getOffsets, defaultTimezoneIsBetweenTextingHours } from '../../lib'
+import { getAssignment } from '../models/cacheable-queries'
 
 export const schema = `
   input AssignmentsFilter {
@@ -63,7 +64,11 @@ export function getContacts(assignment, contactsFilter, organization, campaign) 
   const config = { textingHoursStart, textingHoursEnd, textingHoursEnforced }
   const [validOffsets, invalidOffsets] = getOffsets(config)
 
+  // console.log('assignment' + assignment.id + ' and campaign id:' + campaign.id);
   let query = r.knex('campaign_contact').where('assignment_id', assignment.id)
+  let cacheQuery = getAssignment(campaign.id, assignment.id)
+  // console.log('query:', query);
+  // console.log('cache query:', cacheQuery);
 
   if (contactsFilter) {
     if (hasOwnProperty(contactsFilter, 'validTimezone') && contactsFilter.validTimezone !== null) {

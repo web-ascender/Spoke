@@ -77,15 +77,45 @@ export async function updateAssignments(campaignInfo) {
       for (let i = 0; i < texters.length; i++) {
         let texterId = texters[i].user_id
         let assignmentId = texters[i].id
-        let texterAssignmentKey = `newassignments-${texterId}-${campaignId}`
+        let texterAssignmentKey = `newassignments-${assignmentId}-${campaignId}`
+        console.log('assignment key:', texterAssignmentKey);
         const assignments = await r.knex('campaign_contact')
           .where('assignment_id', assignmentId)
 
         await r.redis.multi()
-          .lpush(texterAssignmentKey, JSON.stringify(assignments))
+          .set(texterAssignmentKey, JSON.stringify(assignments))
           .expire(texterAssignmentKey, 86400)
           .exec()
       }
     }
   }
 }
+
+export async function getAssignment(campaignId, assignmentId) {
+  let query
+  let texterAssignmentKey = `newassignments-${assignmentId}-${campaignId}`
+  if (r.redis) {
+    let assignments = await r.redis
+      .getAsync(texterAssignmentKey)
+      .then(res => {
+        //returns an array
+        // TODO - figure out how to handle filters now that this info is coming back as an array
+        // versus a knex promise
+        return JSON.parse(res)
+      })
+    return assignments
+  } else {
+    query = r.knex('campaign_contact').where('assignment_id', assignment.id)
+    return query
+  }
+}
+
+// export async function getAssignmentFilter(command, assignmentFilter, offsets) {
+//   console.log('command:', command);
+//   console.log('filter:', assignmentFilter);
+//   console.log('offsets:', offsets);
+// query = query.whereIn('timezone_offset', invalidOffsets)
+//   if (command === 'whereIn' && assignmentFilter === 'timezone_offset') {
+//
+//   }
+// }
