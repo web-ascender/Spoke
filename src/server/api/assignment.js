@@ -1,7 +1,7 @@
 import { mapFieldsToModel } from './lib/utils'
 import { Assignment, r } from '../models'
 import { getOffsets, defaultTimezoneIsBetweenTextingHours } from '../../lib'
-import { getAssignment } from '../models/cacheable-queries'
+import { getAssignment, getAssignmentByMessageStatus } from '../models/cacheable-queries'
 
 export const schema = `
   input AssignmentsFilter {
@@ -20,11 +20,13 @@ export const schema = `
 `
 
 function addWhereClauseForMessageStatus(query, messageStatus) {
+  let newQuery
   if (messageStatus.includes(',')) {
     const messageStatuses = messageStatus.split(',')
     return query.whereIn('message_status', messageStatuses)
   }
-  return query.where('message_status', messageStatus)
+  newQuery = getAssignmentByMessageStatus(query, messageStatus)
+  return newQuery
 }
 
 function addWhereClauseForNeedsMessageOrResponse(query) {

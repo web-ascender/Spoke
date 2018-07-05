@@ -110,6 +110,17 @@ export async function getAssignment(campaignId, assignmentId) {
   }
 }
 
+export async function getAssignmentByMessageStatus(query, messageStatus) {
+  let result
+  if (r.redis) {
+    console.log('query:', query);
+    console.log('message status:', messageStatus);
+  } else {
+    result = query.where('message_status', messageStatus)
+    return result
+  }
+}
+
 // export async function getAssignmentFilter(command, assignmentFilter, offsets) {
 //   console.log('command:', command);
 //   console.log('filter:', assignmentFilter);
